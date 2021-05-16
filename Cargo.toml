@@ -3,7 +3,14 @@ name = "bf-rs"
 version = "0.1.0"
 authors = ["Andre Julius <noromoron@gmail.com>"]
 edition = "2018"
+description = "Brainfuck interpreter for Rust"
+readme = "README.md"
 resolver = "2"
+homepage = "https://github.com/NotNorom/bf-rs"
+repository = "https://github.com/NotNorom/bf-rs"
+license = "Unlicense"
+keywords = ["brainfuck", "interpreter"]
+categories = ["command-line-utilities"]
 
 [profile.release]
 opt-level = 3

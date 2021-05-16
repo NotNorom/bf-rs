@@ -1,0 +1,12 @@
+[package]
+name = "bf-rs"
+version = "0.1.0"
+authors = ["Andre Julius <noromoron@gmail.com>"]
+edition = "2018"
+resolver = "2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = 'abort'

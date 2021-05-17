@@ -66,7 +66,7 @@ impl FromStr for Program {
 }
 
 impl Program {
-    pub fn run(&mut self) -> Result<(), std::io::Error> {
+    pub fn run(&mut self) -> Result<(), String> {
         loop {
             match self.instructions.get_mut(self.instruction_pointer) {
                 Some(Instruction::IncrementDataPtr) => {
@@ -98,7 +98,8 @@ impl Program {
                         continue;
                     }
 
-                    self.data[self.data_pointer] = maybe_content.unwrap()?;
+                    self.data[self.data_pointer] =
+                        maybe_content.unwrap().map_err(|e| e.to_string())?;
                     self.instruction_pointer += 1;
                 }
                 Some(Instruction::JmpForwardIfZero) => {
@@ -108,12 +109,20 @@ impl Program {
                     }
 
                     let mut jmp_counter: usize = 1;
+                    // backup ip for debug purpose
+                    let old_ip = self.instruction_pointer;
 
                     while jmp_counter != 0 {
                         self.instruction_pointer += 1;
-                        match self.instructions[self.instruction_pointer] {
-                            Instruction::JmpForwardIfZero => jmp_counter += 1,
-                            Instruction::JmpBackwardIfNonZero => jmp_counter -= 1,
+                        match self.instructions.get(self.instruction_pointer) {
+                            Some(Instruction::JmpForwardIfZero) => jmp_counter += 1,
+                            Some(Instruction::JmpBackwardIfNonZero) => jmp_counter -= 1,
+                            None => {
+                                return Err(format!(
+                                    "Unmatched `[` instruction at position {}",
+                                    old_ip
+                                ))
+                            }
                             _ => {}
                         }
                     }
@@ -126,12 +135,20 @@ impl Program {
                     }
 
                     let mut jmp_counter: usize = 1;
+                    // backup ip for debug purpose
+                    let old_ip = self.instruction_pointer;
 
                     while jmp_counter != 0 {
                         self.instruction_pointer -= 1;
-                        match self.instructions[self.instruction_pointer] {
-                            Instruction::JmpForwardIfZero => jmp_counter -= 1,
-                            Instruction::JmpBackwardIfNonZero => jmp_counter += 1,
+                        match self.instructions.get(self.instruction_pointer) {
+                            Some(Instruction::JmpForwardIfZero) => jmp_counter -= 1,
+                            Some(Instruction::JmpBackwardIfNonZero) => jmp_counter += 1,
+                            None => {
+                                return Err(format!(
+                                    "Unmatched `]` instruction at position {}",
+                                    old_ip
+                                ))
+                            }
                             _ => {}
                         }
                     }

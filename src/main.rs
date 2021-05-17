@@ -70,11 +70,27 @@ impl Program {
         loop {
             match self.instructions.get_mut(self.instruction_pointer) {
                 Some(Instruction::IncrementDataPtr) => {
-                    self.data_pointer += 1;
+                    let new_data_pointer = self.data_pointer + 1;
+                    if new_data_pointer >= DATA_SIZE {
+                        return Err(format!(
+                            "Cannot increae data pointer above or equal to {} at position {}",
+                            DATA_SIZE, self.instruction_pointer
+                        ));
+                    }
+                    self.data_pointer = new_data_pointer;
                     self.instruction_pointer += 1;
                 }
                 Some(Instruction::DecrementDataPtr) => {
-                    self.data_pointer -= 1;
+                    match self.data_pointer.checked_sub(1) {
+                        Some(data_pointer) => self.data_pointer = data_pointer,
+                        None => {
+                            return Err(format!(
+                                "Cannot decrease data pointer below 0 at position {}",
+                                self.instruction_pointer
+                            ))
+                        }
+                    }
+
                     self.instruction_pointer += 1;
                 }
                 Some(Instruction::Increment) => {
